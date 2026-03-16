@@ -1,9 +1,8 @@
 (function () {
   var config = {
     checkout: {
-      solo: "",
-      pro: "",
-      team: ""
+      monthly: "",
+      yearly: ""
     },
     billingPortal: "",
     contactEmail: "billing@speaktotext.hekax.com"
