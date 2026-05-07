@@ -63,11 +63,11 @@ export function Anywhere() {
               key={brand.id}
               className="group relative flex h-20 items-center justify-center rounded-[18px] border border-white/[0.055] bg-white/[0.025] shadow-[0_18px_60px_rgba(0,0,0,0.28)] transition duration-300 hover:z-10 hover:-translate-y-1 hover:border-gold-300/40 hover:bg-white/[0.055] hover:shadow-[0_22px_80px_rgba(210,161,54,0.18)] md:h-24"
               style={{
-                transform:
+                marginTop:
                   index % 5 === 0
-                    ? 'translateY(10px)'
+                    ? '10px'
                     : index % 7 === 0
-                      ? 'translateY(-8px)'
+                      ? '-8px'
                       : undefined
               }}
             >
