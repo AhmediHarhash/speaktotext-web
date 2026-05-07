@@ -1,3 +1,19 @@
-.vercel
-Thumbs.db
-desktop.ini
+node_modules
+.next
+out
+build
+dist
+.env*.local
+.DS_Store
+*.log
+.codex-archive
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+!.env.example

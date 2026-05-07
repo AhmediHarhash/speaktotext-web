@@ -1,0 +1,4 @@
+Contact: mailto:support@hekax.com
+Preferred-Languages: en
+Canonical: https://speaktotext.org/.well-known/security.txt
+Policy: https://speaktotext.org/security

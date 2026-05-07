@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "hekax-marketing-site",
+  "workers_dev": true,
+  "preview_urls": true,
+  "compatibility_date": "2026-05-07",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "hekax-marketing-site"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "routes": [
+    {
+      "pattern": "speaktotext.org",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.speaktotext.org",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://speaktotext.org",
+    "NEXT_PUBLIC_DOWNLOADS_BASE_URL": "https://downloads.speaktotext.org",
+    "NEXT_PUBLIC_MEDIA_BASE_URL": "https://media.speaktotext.org",
+    "NEXT_PUBLIC_FINAL_CTA_VIDEO_URL": "https://media.speaktotext.org/final-cta/v1/final-cta-loop.webm",
+    "NEXT_PUBLIC_FINAL_CTA_VIDEO_POSTER_URL": "https://media.speaktotext.org/final-cta/v1/final-cta-poster.avif",
+    "DOWNLOAD_LATEST_JSON_URL": "https://downloads.speaktotext.org/latest.json",
+    "ENABLE_HSTS": "false"
+  }
+}
