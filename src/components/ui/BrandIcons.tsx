@@ -3,9 +3,9 @@
  * Stroked/filled versions that inherit currentColor so they look consistent in dark UI.
  * Paths are simplified silhouettes of public brand marks.
  */
-import type { SVGProps } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 
-type Icon = (p: SVGProps<SVGSVGElement>) => JSX.Element;
+type Icon = (p: SVGProps<SVGSVGElement>) => ReactElement;
 
 export const ChatGPTIcon: Icon = (p) => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...p}>

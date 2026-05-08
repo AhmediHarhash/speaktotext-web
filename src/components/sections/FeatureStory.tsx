@@ -66,8 +66,13 @@ const CARD_ITEMS: CardItem[] = [
   }
 ];
 
-const SCROLL_VH = 400;
-const STAGGER = 0.55;
+const SCROLL_VH = 520;
+const INTRO_HOLD = 0.65;
+const INTRO_FADE = 0.35;
+const CARD_STAGGER = 0.58;
+const CARD_TRAVEL = 1;
+const CARD_FADE = 0.2;
+const OUTRO_HOLD = 0.32;
 
 export function FeatureStory() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -89,33 +94,59 @@ export function FeatureStory() {
         gsap.set(intro, { autoAlpha: 1 });
       }
 
+      gsap.set(deck, { autoAlpha: 1 });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: spacer,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2
+          scrub: 1.05,
+          invalidateOnRefresh: true
         }
       });
 
       cards.forEach((card, i) => {
         const item = CARD_ITEMS[i]!;
+        const start = INTRO_HOLD + i * CARD_STAGGER;
+
         gsap.set(card, {
-          yPercent: 150 + i * 50,
+          yPercent: 135,
           rotate: item.rotateFrom,
-          opacity: 1,
+          autoAlpha: 0,
           scale: 1.25
         });
+
+        tl.to(
+          card,
+          {
+            autoAlpha: 1,
+            duration: CARD_FADE,
+            ease: 'none'
+          },
+          start
+        );
+
         tl.to(
           card,
           {
             yPercent: -50,
             rotate: item.rotateTo,
             scale: 0.9,
-            duration: 1,
+            duration: CARD_TRAVEL,
             ease: 'none'
           },
-          i * STAGGER
+          start
+        );
+
+        tl.to(
+          card,
+          {
+            autoAlpha: 0,
+            duration: CARD_FADE,
+            ease: 'none'
+          },
+          start + CARD_TRAVEL - CARD_FADE
         );
       });
 
@@ -124,12 +155,14 @@ export function FeatureStory() {
           intro,
           {
             autoAlpha: 0,
-            duration: 0.45,
+            duration: INTRO_FADE,
             ease: 'none'
           },
-          '+=0.08'
+          INTRO_HOLD + 0.22
         );
       }
+
+      tl.to({}, { duration: OUTRO_HOLD });
 
       return () => {
         tl.kill();

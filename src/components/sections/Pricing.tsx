@@ -61,7 +61,8 @@ export function Pricing() {
   return (
     <section
       id="pricing"
-      className="pricing-section relative isolate scroll-mt-28 overflow-hidden py-24 md:scroll-mt-32 md:py-36"
+      data-section-fx
+      className="pricing-section relative isolate flex min-h-[100svh] scroll-mt-28 flex-col justify-center overflow-hidden py-24 md:scroll-mt-32 md:py-36"
     >
       <div aria-hidden className="pricing-section-glow" />
       <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-10">

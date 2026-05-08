@@ -32,22 +32,15 @@ $short = "public, max-age=60"
 
 Upload-R2Object `
   -Bucket $MediaBucket `
-  -Key "final-cta/v1/final-cta-loop.webm" `
-  -File "exports/final-cta/v1/final-cta-loop.webm" `
-  -ContentType "video/webm" `
-  -CacheControl $immutable
-
-Upload-R2Object `
-  -Bucket $MediaBucket `
-  -Key "final-cta/v1/final-cta-loop.mp4" `
-  -File "exports/final-cta/v1/final-cta-loop.mp4" `
+  -Key "final-cta/v2/final-cta-loop.mp4" `
+  -File "exports/final-cta/v2/final-cta-loop.mp4" `
   -ContentType "video/mp4" `
   -CacheControl $immutable
 
 Upload-R2Object `
   -Bucket $MediaBucket `
-  -Key "final-cta/v1/final-cta-poster.avif" `
-  -File "exports/final-cta/v1/final-cta-poster.avif" `
+  -Key "final-cta/v2/final-cta-poster.avif" `
+  -File "exports/final-cta/v2/final-cta-poster.avif" `
   -ContentType "image/avif" `
   -CacheControl $immutable
 

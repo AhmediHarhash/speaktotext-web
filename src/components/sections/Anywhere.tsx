@@ -1,15 +1,68 @@
 'use client';
 
+import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import { SectionHeading } from '../ui/SectionHeading';
-import { BRANDS } from './anywhere-3d/brandsData';
 
-const visibleBrands = BRANDS.slice(0, 96);
+// React Three Fiber is client-only; Three.js touches window/document at import.
+const AnywhereCanvas = dynamic(
+  () => import('./AnywhereCanvas').then((m) => m.AnywhereCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center">
+        <span className="text-xs uppercase tracking-[0.22em] text-silver-400">
+          Loading 3D scene...
+        </span>
+      </div>
+    )
+  }
+);
 
 export function Anywhere() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [mountCanvas, setMountCanvas] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || mountCanvas) return;
+
+    const timers: { warmup?: number; fallback?: number } = {};
+
+    const revealCanvas = () => {
+      window.clearTimeout(timers.warmup);
+      window.clearTimeout(timers.fallback);
+      setMountCanvas(true);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || timers.warmup) return;
+        timers.warmup = window.setTimeout(revealCanvas, 1200);
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px 120px 0px',
+        threshold: 0.01
+      }
+    );
+
+    observer.observe(section);
+    timers.fallback = window.setTimeout(revealCanvas, 6500);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timers.warmup);
+      window.clearTimeout(timers.fallback);
+    };
+  }, [mountCanvas]);
+
   return (
     <section
+      ref={sectionRef}
       id="anywhere"
-      className="relative isolate scroll-mt-28 overflow-hidden py-12 md:scroll-mt-32 md:py-14"
+      data-section-fx
+      className="relative isolate flex min-h-[100svh] scroll-mt-28 flex-col justify-center overflow-hidden py-12 md:scroll-mt-32 md:py-14"
     >
       <div
         aria-hidden
@@ -39,56 +92,12 @@ export function Anywhere() {
         />
       </div>
 
-      <div className="relative z-10 left-1/2 mt-8 w-screen -translate-x-1/2 overflow-hidden bg-transparent pb-8 md:mt-12 md:pb-12">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-20 h-16 bg-gradient-to-b from-ink-950 to-transparent"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-20 bg-gradient-to-t from-ink-950 to-transparent"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 z-20 w-[14vw] bg-gradient-to-r from-ink-950 to-transparent"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-0 z-20 w-[14vw] bg-gradient-to-l from-ink-950 to-transparent"
-        />
-
-        <div className="mx-auto grid max-w-[1500px] grid-cols-3 gap-3 px-6 sm:grid-cols-5 md:grid-cols-8 md:gap-4 lg:grid-cols-12 lg:px-10">
-          {visibleBrands.map((brand, index) => (
-            <div
-              key={brand.id}
-              className="group relative flex h-20 items-center justify-center rounded-[18px] border border-white/[0.055] bg-white/[0.025] shadow-[0_18px_60px_rgba(0,0,0,0.28)] transition duration-300 hover:z-10 hover:-translate-y-1 hover:border-gold-300/40 hover:bg-white/[0.055] hover:shadow-[0_22px_80px_rgba(210,161,54,0.18)] md:h-24"
-              style={{
-                marginTop:
-                  index % 5 === 0
-                    ? '10px'
-                    : index % 7 === 0
-                      ? '-8px'
-                      : undefined
-              }}
-            >
-              <div
-                aria-hidden
-                className="absolute inset-0 rounded-[18px] opacity-0 transition duration-300 group-hover:opacity-100"
-                style={{
-                  background: `radial-gradient(circle at 50% 42%, ${brand.accent}26, transparent 62%)`
-                }}
-              />
-              <img
-                src={brand.iconUrl}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="relative h-8 w-8 object-contain opacity-80 saturate-[0.9] transition duration-300 group-hover:scale-110 group-hover:opacity-100 md:h-10 md:w-10"
-              />
-              <span className="sr-only">{brand.name}</span>
-            </div>
-          ))}
-        </div>
+      <div className="relative z-10 left-1/2 -mt-2 h-[60svh] min-h-[520px] max-h-[670px] w-screen -translate-x-1/2 overflow-hidden bg-transparent md:-mt-8 md:h-[69svh] md:min-h-[670px] md:max-h-[800px]">
+        {mountCanvas ? (
+          <AnywhereCanvas />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center" />
+        )}
       </div>
     </section>
   );

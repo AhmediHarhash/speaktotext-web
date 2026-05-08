@@ -109,11 +109,10 @@ const TopographyMaterial = shaderMaterial(
 
 extend({ TopographyMaterial });
 
-import type { Object3DNode } from '@react-three/fiber';
+import type { ThreeElement } from '@react-three/fiber';
 declare module '@react-three/fiber' {
   interface ThreeElements {
-    topographyMaterial: Object3DNode<
-      InstanceType<typeof TopographyMaterial>,
+    topographyMaterial: ThreeElement<
       typeof TopographyMaterial
     > & {
       uTime?: number;

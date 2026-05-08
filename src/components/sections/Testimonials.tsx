@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactElement } from 'react';
 import {
   Heart,
   MessageCircle,
@@ -44,7 +45,8 @@ export function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="relative scroll-mt-28 py-28 md:scroll-mt-32 md:py-36"
+      data-section-fx
+      className="relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center py-28 md:scroll-mt-32 md:py-36"
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionHeading
@@ -141,7 +143,7 @@ function PlatformBadge({
   label,
   className
 }: {
-  Icon: (p: { className?: string }) => JSX.Element;
+  Icon: (p: { className?: string }) => ReactElement;
   label: string;
   className?: string;
 }) {

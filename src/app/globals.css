@@ -283,9 +283,14 @@
 
   .how-video-player {
     z-index: 1;
+    left: 50%;
+    top: 50%;
+    width: min(100vw, calc(100svh * 1672 / 941));
+    height: min(100svh, calc(100vw * 941 / 1672));
     background: #02040a;
+    overflow: hidden;
     pointer-events: none;
-    transform: translateZ(0);
+    transform: translate3d(-50%, -50%, 0);
     will-change: opacity;
   }
 

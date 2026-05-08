@@ -381,7 +381,8 @@ export function Hero() {
     <section
       id="top"
       ref={sectionRef}
-      className="hero-shell relative overflow-hidden bg-ink-950 pt-32 md:pt-40"
+      data-section-fx
+      className="hero-shell relative flex min-h-[100svh] flex-col justify-center overflow-hidden bg-ink-950 pt-32 md:pt-40"
     >
       <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 overflow-visible px-6 pb-24 md:pb-32 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10 lg:px-10">
         {/* LEFT: copy */}

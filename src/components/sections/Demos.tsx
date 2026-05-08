@@ -436,7 +436,8 @@ export function Demos() {
     <section
       ref={sectionRef}
       id="demos"
-      className="real-demos-section relative scroll-mt-28 overflow-hidden py-24 md:scroll-mt-32 md:py-32 lg:py-36"
+      data-section-fx
+      className="real-demos-section relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center overflow-hidden py-24 md:scroll-mt-32 md:py-32 lg:py-36"
     >
       <div aria-hidden="true" className="real-demos-ambient" />
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">

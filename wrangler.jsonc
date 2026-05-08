@@ -38,8 +38,8 @@
     "NEXT_PUBLIC_SITE_URL": "https://speaktotext.org",
     "NEXT_PUBLIC_DOWNLOADS_BASE_URL": "https://downloads.speaktotext.org",
     "NEXT_PUBLIC_MEDIA_BASE_URL": "https://media.speaktotext.org",
-    "NEXT_PUBLIC_FINAL_CTA_VIDEO_URL": "https://media.speaktotext.org/final-cta/v1/final-cta-loop.webm",
-    "NEXT_PUBLIC_FINAL_CTA_VIDEO_POSTER_URL": "https://media.speaktotext.org/final-cta/v1/final-cta-poster.avif",
+    "NEXT_PUBLIC_FINAL_CTA_VIDEO_URL": "https://media.speaktotext.org/final-cta/v2/final-cta-loop.mp4",
+    "NEXT_PUBLIC_FINAL_CTA_VIDEO_POSTER_URL": "https://media.speaktotext.org/final-cta/v2/final-cta-poster.avif",
     "DOWNLOAD_LATEST_JSON_URL": "https://downloads.speaktotext.org/latest.json",
     "ENABLE_HSTS": "false"
   }

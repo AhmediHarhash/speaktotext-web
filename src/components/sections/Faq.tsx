@@ -12,7 +12,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="relative scroll-mt-28 py-28 md:scroll-mt-32 md:py-36">
+    <section id="faq" data-section-fx className="relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center py-28 md:scroll-mt-32 md:py-36">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-72 bg-gradient-to-b from-transparent to-black"

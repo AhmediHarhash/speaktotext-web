@@ -7,6 +7,11 @@ dist
 .DS_Store
 *.log
 .codex-archive
+.codex-*
+.wrangler-dry-run
+exports
+# cinematic videos: large binaries, kept local only
+public/cinematic/videos
 
 # OpenNext
 .open-next

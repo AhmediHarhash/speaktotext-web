@@ -14,7 +14,8 @@ const scriptSrc = [
   'https://js.stripe.com',
   'https://www.youtube.com',
   'https://www.youtube-nocookie.com',
-  'https://s.ytimg.com'
+  'https://s.ytimg.com',
+  'https://static.cloudflareinsights.com'
 ];
 
 const connectSrc = [
@@ -24,6 +25,7 @@ const connectSrc = [
   'https://analytics.google.com',
   'https://checkout.stripe.com',
   'https://api.stripe.com',
+  'https://cloudflareinsights.com',
   'https://media.speaktotext.org',
   'https://downloads.speaktotext.org',
   'https://*.r2.dev',

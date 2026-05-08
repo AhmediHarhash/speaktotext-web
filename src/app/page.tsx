@@ -1,5 +1,7 @@
 import { Navbar } from '@/components/Navbar';
 import { HashScrollRestorer } from '@/components/HashScrollRestorer';
+import { SmoothScroll } from '@/components/SmoothScroll';
+import { SectionTransitions } from '@/components/SectionTransitions';
 import { Hero } from '@/components/sections/Hero';
 import { Demos } from '@/components/sections/Demos';
 import { Anywhere } from '@/components/sections/Anywhere';
@@ -15,6 +17,8 @@ export default function Page() {
   return (
     <main className="relative">
       <StructuredData />
+      <SmoothScroll />
+      <SectionTransitions />
       <Navbar />
       <HashScrollRestorer />
       <Hero />

@@ -75,7 +75,7 @@ export function HowItWorks() {
       const getPortalMetrics = () => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const scale = Math.max(viewportWidth / FRONT_IMAGE.width, viewportHeight / FRONT_IMAGE.height);
+        const scale = Math.min(viewportWidth / FRONT_IMAGE.width, viewportHeight / FRONT_IMAGE.height);
         const renderedWidth = FRONT_IMAGE.width * scale;
         const renderedHeight = FRONT_IMAGE.height * scale;
         const offsetX = (viewportWidth - renderedWidth) / 2;
@@ -113,7 +113,7 @@ export function HowItWorks() {
       };
 
       setPortalStart();
-      gsap.set(front, { scale: 1, willChange: 'transform, opacity, -webkit-mask-image, mask-image' });
+      gsap.set(front, { willChange: 'opacity, -webkit-mask-image, mask-image' });
       if (player) {
         gsap.set(player, { autoAlpha: 0, pointerEvents: 'none' });
         player.setAttribute('aria-hidden', 'true');
@@ -165,7 +165,7 @@ export function HowItWorks() {
             },
             onRefreshInit: () => {
               setPortalStart();
-              gsap.set(front, { scale: 1 });
+              gsap.set(front, { clearProps: 'scale' });
               disablePlayer();
               gsap.set(exitFade, { autoAlpha: 0 });
             }
@@ -185,7 +185,7 @@ export function HowItWorks() {
               '--how-hole-x': () => `${getPortalMetrics().x}px`,
               '--how-hole-y': () => `${getPortalMetrics().y}px`,
               '--how-hole-r': () => `${getPortalMetrics().fullRadius}px`,
-              scale: 1.025,
+              scale: 1,
               duration: 0.74
             },
             0
@@ -214,7 +214,7 @@ export function HowItWorks() {
             <img
               src={VIDEO_PLATE}
               alt=""
-              className="how-portal-back absolute inset-0 h-full w-full object-cover"
+              className="how-portal-back absolute inset-0 h-full w-full object-contain"
               draggable={false}
               loading="lazy"
               decoding="async"
@@ -223,7 +223,7 @@ export function HowItWorks() {
             {hasVideoEmbed ? (
               <div
                 data-how-player
-                className="how-video-player absolute inset-0"
+                className="how-video-player absolute"
                 aria-hidden="true"
                 onPointerDown={() => trackHowVideo('how_it_works_video_interaction')}
               >
@@ -232,7 +232,7 @@ export function HowItWorks() {
                     data-how-owned-video
                     data-src={OWNED_VIDEO}
                     title="SpeakToText how it works video"
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-contain"
                     controls
                     playsInline
                     preload="none"
@@ -258,7 +258,7 @@ export function HowItWorks() {
               src={FRONT_POSTER}
               alt=""
               data-how-front
-              className="how-portal-front absolute inset-0 h-full w-full object-cover"
+              className="how-portal-front absolute inset-0 h-full w-full object-contain"
               draggable={false}
               loading="lazy"
               decoding="async"

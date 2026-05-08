@@ -7,7 +7,10 @@ const HowItWorksClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <section id="how" className="relative min-h-[100svh] bg-[#02040a]" />
+      <section
+        id="how"
+        className="relative h-[280svh] min-h-[1500px] bg-[#02040a] md:h-[320svh] md:min-h-[1850px]"
+      />
     )
   }
 );

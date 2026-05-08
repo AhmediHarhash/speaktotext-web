@@ -72,12 +72,11 @@ export const HoloCardMaterial = shaderMaterial(
 
 extend({ HoloCardMaterial });
 
-// Augment R3F's JSX intrinsics so <holoCardMaterial /> is typed
-import type { Object3DNode } from '@react-three/fiber';
+// Augment R3F's JSX intrinsics so <holoCardMaterial /> is typed.
+import type { ThreeElement } from '@react-three/fiber';
 declare module '@react-three/fiber' {
   interface ThreeElements {
-    holoCardMaterial: Object3DNode<
-      InstanceType<typeof HoloCardMaterial>,
+    holoCardMaterial: ThreeElement<
       typeof HoloCardMaterial
     > & {
       uTime?: number;

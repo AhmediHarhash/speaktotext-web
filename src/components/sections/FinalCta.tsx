@@ -18,15 +18,15 @@ import { HlsVideo } from '../ui/HlsVideo';
 
 const FINAL_CTA_VIDEO =
   process.env.NEXT_PUBLIC_FINAL_CTA_VIDEO_URL ??
-  `${MEDIA_BASE_URL}/final-cta/v1/final-cta-loop.webm`;
+  `${MEDIA_BASE_URL}/final-cta/v2/final-cta-loop.mp4`;
 
 const FINAL_CTA_POSTER =
   process.env.NEXT_PUBLIC_FINAL_CTA_VIDEO_POSTER_URL ??
-  `${MEDIA_BASE_URL}/final-cta/v1/final-cta-poster.avif`;
+  `${MEDIA_BASE_URL}/final-cta/v2/final-cta-poster.avif`;
 
 export function FinalCta() {
   return (
-    <section className="relative isolate -mt-28 overflow-hidden bg-transparent pt-28">
+    <section data-section-fx className="relative isolate -mt-28 flex min-h-[100svh] flex-col justify-center overflow-hidden bg-transparent pt-28">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[34rem] bg-gradient-to-b from-transparent via-black/85 to-black"
