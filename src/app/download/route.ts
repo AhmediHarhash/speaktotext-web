@@ -26,6 +26,17 @@ type LatestDownload = {
 const DEFAULT_ASSET_PATTERN =
   /\.(exe|msi|msix|msixbundle|appinstaller|zip)$/i;
 
+const WINDOWS_SETUP_PRIORITY = [
+  /setup.*\.exe$/i,
+  /installer.*\.exe$/i,
+  /\.exe$/i,
+  /\.msixbundle$/i,
+  /\.msix$/i,
+  /\.appinstaller$/i,
+  /\.msi$/i,
+  /\.zip$/i
+] as const;
+
 function isSafeDownloadUrl(value: string | undefined) {
   if (!value) return false;
 
@@ -87,7 +98,23 @@ function chooseReleaseAsset(assets: GitHubReleaseAsset[] | undefined) {
     );
   });
 
-  return candidates[0]?.browser_download_url ?? null;
+  const sortedCandidates = candidates.toSorted((assetA, assetB) => {
+    const nameA = assetA.name ?? '';
+    const nameB = assetB.name ?? '';
+    const priorityA = WINDOWS_SETUP_PRIORITY.findIndex((test) =>
+      test.test(nameA)
+    );
+    const priorityB = WINDOWS_SETUP_PRIORITY.findIndex((test) =>
+      test.test(nameB)
+    );
+
+    return (
+      (priorityA === -1 ? WINDOWS_SETUP_PRIORITY.length : priorityA) -
+      (priorityB === -1 ? WINDOWS_SETUP_PRIORITY.length : priorityB)
+    );
+  });
+
+  return sortedCandidates[0]?.browser_download_url ?? null;
 }
 
 async function resolveGitHubLatestReleaseUrl() {
