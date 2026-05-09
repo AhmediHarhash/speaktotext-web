@@ -12,12 +12,12 @@ gsap.registerPlugin(ScrollTrigger);
  * Applies a scrubbed enter/exit timeline to every section tagged with
  * `data-section-fx`. The effect:
  *
- *   1. When a section enters the viewport from below, it rises, unfades,
- *      and scales up from 0.94 to 1 as its top crosses from the bottom
+ *   1. When a section enters the viewport from below, it rises gently
+ *      and scales up from 0.975 to 1 as its top crosses from the bottom
  *      of the viewport to 55% height.
- *   2. When the section leaves upward, it fades, drops, and scales back
- *      down from the moment its bottom reaches 45% of the viewport until
- *      it exits at the top.
+ *   2. When the section leaves upward, it drifts and scales back slightly
+ *      from the moment its bottom reaches 45% of the viewport until it
+ *      exits at the top.
  *
  * Combined with Lenis smooth scroll, this delivers the "each section
  * turns" feel seen on sidewave.it and voxr.ai — without pinning every
@@ -44,8 +44,15 @@ export function SectionTransitions() {
 
     const ctx = gsap.context(() => {
       sections.forEach((section, index) => {
-        const inner = section.querySelector<HTMLElement>('[data-section-fx-inner]');
-        const target = inner ?? section;
+        if (section.hasAttribute('data-section-fx-pinned')) return;
+
+        const target = section.querySelector<HTMLElement>('[data-section-fx-inner]');
+        if (!target) return;
+
+        // Keep section content fully readable. Backgrounds, canvases, and
+        // pricing cards should never dim just because a scroll hand-off is
+        // happening.
+        gsap.set(target, { autoAlpha: 1, filter: 'none' });
 
         // Hero (first section) is visible on first paint and has its own
         // entrance animation — skip the scroll-linked entrance on it, but
@@ -56,9 +63,8 @@ export function SectionTransitions() {
         if (!isFirst) {
           gsap.fromTo(
             target,
-            { autoAlpha: 0.2, y: 60, scale: 0.94 },
+            { y: 42, scale: 0.975 },
             {
-              autoAlpha: 1,
               y: 0,
               scale: 1,
               ease: 'none',
@@ -72,15 +78,14 @@ export function SectionTransitions() {
           );
         }
 
-        // Exit: start dimming/shrinking once the section's bottom has
-        // passed the 45% mark of the viewport, finish by the time it
-        // clears the top. Last section (FinalCta) should not animate out.
+        // Exit: drift/shrink once the section's bottom has passed the 45%
+        // mark of the viewport, finish by the time it clears the top. Last
+        // section (FinalCta) should not animate out.
         const isLast = index === sections.length - 1;
         if (!isLast) {
           gsap.to(target, {
-            autoAlpha: 0.25,
-            y: -50,
-            scale: 0.95,
+            y: -30,
+            scale: 0.985,
             ease: 'none',
             scrollTrigger: {
               trigger: section,

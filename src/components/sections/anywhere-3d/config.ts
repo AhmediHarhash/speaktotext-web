@@ -39,8 +39,8 @@ export const DEFAULT_CONFIG = {
   cullDistance: 28,
 
   // Fog: dark palette for our site
-  fogNear: 42,
-  fogFar: 140,
+  fogNear: 58,
+  fogFar: 170,
 
   // Animation
   enterStartOpacity: 0.0,
@@ -60,10 +60,10 @@ export const DEFAULT_CONFIG = {
 
   // Topography background
   bgColor: '#D4A548',
-  bgOpacity: 0.26,
-  bgSpeed: 0.045,
-  bgScale: 3.05,
-  bgLineThickness: 0.03,
+  bgOpacity: 0.34,
+  bgSpeed: 0.038,
+  bgScale: 3.2,
+  bgLineThickness: 0.026,
 
   // Scene colors (dark theme)
   sceneBg: '#05070D'
@@ -87,7 +87,9 @@ const WALL_PROFILES: Record<WallProfile, Partial<typeof DEFAULT_CONFIG>> = {
     cullDistance: 24,
     curvatureStrength: 0.052,
     edgeCurveStrength: 1.15,
-    fogNear: 42
+    fogNear: 54,
+    fogFar: 155,
+    bgOpacity: 0.3
   }
 };
 

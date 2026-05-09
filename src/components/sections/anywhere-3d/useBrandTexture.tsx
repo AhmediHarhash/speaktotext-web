@@ -16,7 +16,9 @@ const textureLoader = new THREE.TextureLoader();
 export async function makeBrandTexture(brand: BrandItem): Promise<THREE.Texture> {
   const texture = await textureLoader.loadAsync(brand.iconUrl);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  texture.anisotropy = 2;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
   return texture;
 }
@@ -90,7 +92,9 @@ function makeFallbackTexture(brand: BrandItem): THREE.CanvasTexture | null {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  texture.anisotropy = 2;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
   return texture;
 }

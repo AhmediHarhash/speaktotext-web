@@ -65,7 +65,7 @@ export function Pricing() {
       className="pricing-section relative isolate flex min-h-[100svh] scroll-mt-28 flex-col justify-center overflow-hidden py-24 md:scroll-mt-32 md:py-36"
     >
       <div aria-hidden className="pricing-section-glow" />
-      <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-10">
+      <div data-section-fx-inner className="relative z-10 mx-auto max-w-6xl px-6 lg:px-10">
         <SectionHeading
           title="One Premium plan."
           accent="Use your voice without limits."

@@ -75,7 +75,7 @@ export function HowItWorks() {
       const getPortalMetrics = () => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const scale = Math.min(viewportWidth / FRONT_IMAGE.width, viewportHeight / FRONT_IMAGE.height);
+        const scale = Math.max(viewportWidth / FRONT_IMAGE.width, viewportHeight / FRONT_IMAGE.height);
         const renderedWidth = FRONT_IMAGE.width * scale;
         const renderedHeight = FRONT_IMAGE.height * scale;
         const offsetX = (viewportWidth - renderedWidth) / 2;
@@ -214,7 +214,7 @@ export function HowItWorks() {
             <img
               src={VIDEO_PLATE}
               alt=""
-              className="how-portal-back absolute inset-0 h-full w-full object-contain"
+              className="how-portal-back absolute inset-0 h-full w-full object-cover"
               draggable={false}
               loading="lazy"
               decoding="async"
@@ -258,7 +258,7 @@ export function HowItWorks() {
               src={FRONT_POSTER}
               alt=""
               data-how-front
-              className="how-portal-front absolute inset-0 h-full w-full object-contain"
+              className="how-portal-front absolute inset-0 h-full w-full object-cover"
               draggable={false}
               loading="lazy"
               decoding="async"

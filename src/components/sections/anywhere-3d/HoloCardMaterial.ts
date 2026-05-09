@@ -32,7 +32,7 @@ const fragmentShader = /* glsl */ `
 
   void main() {
     vec4 texColor = texture2D(uTexture, vUv);
-    vec3 baseColor = texColor.rgb;
+    vec3 baseColor = min(texColor.rgb * 1.12 + vec3(0.025, 0.022, 0.016), vec3(1.0));
 
     if (uActive < 0.01) {
       gl_FragColor = vec4(baseColor, texColor.a * uOpacity);

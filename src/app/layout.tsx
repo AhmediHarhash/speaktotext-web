@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import {
+  Bebas_Neue,
   Cormorant_Garamond,
   Inter,
   Instrument_Serif
@@ -32,6 +33,13 @@ const display = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['500', '600', '700'],
   variable: '--font-display',
+  display: 'swap'
+});
+
+const cinematic = Bebas_Neue({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-cinematic',
   display: 'swap'
 });
 
@@ -82,9 +90,9 @@ export const metadata: Metadata = {
     images: [SOCIAL_IMAGE]
   },
   icons: {
-    icon: '/brand/logo.png',
-    shortcut: '/brand/logo.png',
-    apple: '/brand/logo.png'
+    icon: '/brand/icon-192.png',
+    shortcut: '/brand/icon-192.png',
+    apple: '/brand/icon-512.png'
   },
   manifest: '/manifest.webmanifest'
 };
@@ -103,7 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${serif.variable} ${display.variable}`}
+      className={`${sans.variable} ${serif.variable} ${display.variable} ${cinematic.variable}`}
     >
       <body className="min-h-screen overflow-x-clip antialiased">
         <Analytics />

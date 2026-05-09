@@ -384,7 +384,7 @@ export function BrandTile({
 
       {/* Visible textured plane with holo card shader */}
       <mesh>
-        <planeGeometry args={[imageDims.width, imageDims.height, 16, 16]} />
+        <planeGeometry args={[imageDims.width, imageDims.height, 1, 1]} />
         <holoCardMaterial
           ref={imageRef}
           transparent

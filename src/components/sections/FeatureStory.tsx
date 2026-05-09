@@ -66,13 +66,14 @@ const CARD_ITEMS: CardItem[] = [
   }
 ];
 
-const SCROLL_VH = 520;
+const SCROLL_VH = 560;
 const INTRO_HOLD = 0.65;
 const INTRO_FADE = 0.35;
-const CARD_STAGGER = 0.58;
-const CARD_TRAVEL = 1;
-const CARD_FADE = 0.2;
-const OUTRO_HOLD = 0.32;
+const CARD_STAGGER = 0.72;
+const CARD_LAND = 0.82;
+const STACK_HOLD = 0.8;
+const STACK_FADE = 0.52;
+const OUTRO_HOLD = 0.26;
 
 export function FeatureStory() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -90,11 +91,25 @@ export function FeatureStory() {
       const cards = gsap.utils.toArray<HTMLElement>('.card', deck);
       if (!cards.length) return;
 
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+
       if (intro) {
         gsap.set(intro, { autoAlpha: 1 });
       }
 
       gsap.set(deck, { autoAlpha: 1 });
+
+      if (reduceMotion) {
+        gsap.set(cards, {
+          xPercent: -50,
+          yPercent: -50,
+          autoAlpha: 0
+        });
+        gsap.set(cards[0], { autoAlpha: 1, rotate: 0, scale: 1 });
+        return;
+      }
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -111,43 +126,40 @@ export function FeatureStory() {
         const start = INTRO_HOLD + i * CARD_STAGGER;
 
         gsap.set(card, {
-          yPercent: 135,
+          xPercent: -50,
+          yPercent: 94,
           rotate: item.rotateFrom,
           autoAlpha: 0,
-          scale: 1.25
+          scale: 0.96,
+          zIndex: i + 1,
+          transformOrigin: '50% 58%'
         });
 
         tl.to(
           card,
           {
             autoAlpha: 1,
-            duration: CARD_FADE,
-            ease: 'none'
-          },
-          start
-        );
-
-        tl.to(
-          card,
-          {
-            yPercent: -50,
+            yPercent: -50 + i * 0.75,
             rotate: item.rotateTo,
-            scale: 0.9,
-            duration: CARD_TRAVEL,
-            ease: 'none'
+            scale: 1 - i * 0.008,
+            duration: CARD_LAND,
+            ease: 'power3.out'
           },
           start
         );
 
-        tl.to(
-          card,
-          {
-            autoAlpha: 0,
-            duration: CARD_FADE,
-            ease: 'none'
-          },
-          start + CARD_TRAVEL - CARD_FADE
-        );
+        if (i > 0) {
+          tl.to(
+            cards.slice(0, i),
+            {
+              yPercent: (index) => -50 + index * 0.75 - i * 0.9,
+              scale: (index) => 1 - index * 0.008 - i * 0.012,
+              duration: CARD_LAND,
+              ease: 'power3.out'
+            },
+            start
+          );
+        }
       });
 
       if (intro) {
@@ -162,6 +174,21 @@ export function FeatureStory() {
         );
       }
 
+      const stackOutro =
+        INTRO_HOLD + (cards.length - 1) * CARD_STAGGER + CARD_LAND + STACK_HOLD;
+
+      tl.to(
+        cards,
+        {
+          autoAlpha: 0,
+          yPercent: (index) => -61 + index * 0.75,
+          scale: (index) => 0.96 - index * 0.006,
+          duration: STACK_FADE,
+          ease: 'none'
+        },
+        stackOutro
+      );
+
       tl.to({}, { duration: OUTRO_HOLD });
 
       return () => {
@@ -173,7 +200,7 @@ export function FeatureStory() {
 
   return (
     <section id="features" className="relative scroll-mt-0">
-      <div className="relative w-full bg-[#12100e]" ref={rootRef}>
+      <div className="feature-story-section relative w-full bg-[#12100e]" ref={rootRef}>
         <div
           data-scroll-spacer
           className="relative w-full"
@@ -276,7 +303,7 @@ function Card({
   return (
     <article
       className={[
-        'flex min-h-[28rem] w-full min-w-0 max-w-[min(42rem,calc(100vw-3rem))] flex-col justify-between gap-12 overflow-hidden rounded-2xl border border-white/10 p-10 shadow-[0_36px_110px_rgba(0,0,0,0.58),inset_0_1px_0_rgba(255,255,255,0.13),0_0_0_1px_rgba(232,194,106,0.06)] md:min-h-[36rem] md:gap-14 md:p-12 lg:min-h-[38rem] lg:p-14',
+        'feature-story-card flex min-h-[28rem] w-full min-w-0 max-w-[min(42rem,calc(100vw-3rem))] flex-col justify-between gap-12 overflow-hidden rounded-2xl border border-white/10 p-10 shadow-[0_36px_110px_rgba(0,0,0,0.58),inset_0_1px_0_rgba(255,255,255,0.13),0_0_0_1px_rgba(232,194,106,0.06)] md:min-h-[36rem] md:gap-14 md:p-12 lg:min-h-[38rem] lg:p-14',
         className ?? ''
       ].join(' ')}
       style={{ background }}

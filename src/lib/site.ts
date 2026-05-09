@@ -15,7 +15,8 @@ export const MEDIA_BASE_URL =
   'https://media.speaktotext.org';
 
 export const GITHUB_RELEASES_URL =
-  process.env.NEXT_PUBLIC_GITHUB_RELEASES_URL ?? '';
+  process.env.NEXT_PUBLIC_GITHUB_RELEASES_URL ??
+  'https://github.com/hekax/speaktotext/releases/latest';
 
 export const DEFAULT_META_TITLE =
   'SpeakToText | Stop wasting time typing.';

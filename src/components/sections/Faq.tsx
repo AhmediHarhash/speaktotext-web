@@ -17,7 +17,7 @@ export function Faq() {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-72 bg-gradient-to-b from-transparent to-black"
       />
-      <div className="relative z-10 mx-auto max-w-3xl px-6 lg:px-10">
+      <div data-section-fx-inner className="relative z-10 mx-auto max-w-3xl px-6 lg:px-10">
         <SectionHeading
           eyebrow="FAQ"
           title="Questions"

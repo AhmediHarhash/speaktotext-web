@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, type CSSProperties } from 'react';
+import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DEMO_TABS } from '@/lib/content';
-import { SectionHeading } from '../ui/SectionHeading';
-import { Reveal } from '../ui/Reveal';
 import {
   ChatGPTIcon,
   ClaudeIcon,
@@ -12,7 +12,11 @@ import {
   LinkedInIcon,
   WordIcon
 } from '../ui/BrandIcons';
-import { cn } from '@/lib/cn';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+type DemoItem = (typeof DEMO_TABS)[number];
+type DemoId = DemoItem['id'];
 
 const TAB_ICONS = {
   chatgpt: ChatGPTIcon,
@@ -22,515 +26,485 @@ const TAB_ICONS = {
   docs: WordIcon
 } as const;
 
-type DemoId = (typeof DEMO_TABS)[number]['id'];
+const DEMO_META: Record<
+  DemoId,
+  { number: string; accent: string; mode: string }
+> = {
+  chatgpt: {
+    number: '01',
+    accent: '#f2c76d',
+    mode: 'Prompt'
+  },
+  claude: {
+    number: '02',
+    accent: '#d7b77a',
+    mode: 'Brief'
+  },
+  gmail: {
+    number: '03',
+    accent: '#e6c98e',
+    mode: 'Reply'
+  },
+  linkedin: {
+    number: '04',
+    accent: '#c9d2e0',
+    mode: 'Post'
+  },
+  docs: {
+    number: '05',
+    accent: '#ffe6a3',
+    mode: 'Notes'
+  }
+};
 
 function splitWords(text: string) {
   return text.split(' ').filter(Boolean);
 }
 
-const DEMO_OUTPUT_EFFECTS: Record<
-  DemoId,
-  { sweep: string[]; flip: string[]; spin: string[]; frame: string[] }
-> = {
-  chatgpt: {
-    sweep: ['SpeakToText', 'polished', 'organic'],
-    flip: ['launch'],
-    spin: ['simple'],
-    frame: ['Context:']
-  },
-  claude: {
-    sweep: ['premium', 'polished', 'smooth'],
-    flip: ['GSAP'],
-    spin: ['demo'],
-    frame: ['Goal:']
-  },
-  gmail: {
-    sweep: ['Thursday', 'notes', 'team'],
-    flip: ['mobile'],
-    spin: ['pricing'],
-    frame: ['Subject:']
-  },
-  linkedin: {
-    sweep: ['Typing', 'voice', 'usable'],
-    flip: ['drafts'],
-    spin: ['spoken'],
-    frame: ['Clean']
-  },
-  docs: {
-    sweep: ['Focus', 'before-and-after', 'restrained'],
-    flip: ['GSAP'],
-    spin: ['SEO'],
-    frame: ['Key']
-  }
-};
-
-function normalizeEffectWord(word: string) {
-  return word.toLowerCase().replace(/[^a-z0-9-]/g, '');
-}
-
-function getOutputEffect(word: string, demoId: DemoId) {
-  const normalized = normalizeEffectWord(word);
-  const effects = DEMO_OUTPUT_EFFECTS[demoId];
-  const sweep = effects.sweep.some(
-    (term) => normalizeEffectWord(term) === normalized
-  );
-  const flipIndex = effects.flip.findIndex(
-    (term) => normalizeEffectWord(term) === normalized
-  );
-  const spin = effects.spin.some(
-    (term) => normalizeEffectWord(term) === normalized
-  );
-  const frame = effects.frame.some(
-    (term) => normalizeEffectWord(term) === normalized
-  );
-
-  return {
-    sweep,
-    flip: flipIndex >= 0,
-    spin,
-    frame,
-    direction: Math.max(flipIndex, 0) % 3
-  };
-}
-
-function renderOutputWords(text: string, keyPrefix: string, demoId: DemoId) {
-  return splitWords(text).map((word, index) => {
-    const effect = getOutputEffect(word, demoId);
-
-    if (!effect.sweep && !effect.flip && !effect.spin && !effect.frame) {
-      return (
-        <span key={`${keyPrefix}-${word}-${index}`} data-demo-output-word>
+function DemoWords({
+  text,
+  kind,
+  prefix
+}: {
+  text: string;
+  kind: 'rough' | 'polished' | 'ghost';
+  prefix: string;
+}) {
+  return (
+    <>
+      {splitWords(text).map((word, index) => (
+        <span
+          key={`${prefix}-${word}-${index}`}
+          data-demo-rough-word={kind === 'rough' ? 'true' : undefined}
+          data-demo-polished-word={kind === 'polished' ? 'true' : undefined}
+          data-demo-ghost-word={kind === 'ghost' ? 'true' : undefined}
+        >
           {word}
         </span>
-      );
-    }
-
-    return (
-      <span
-        key={`${keyPrefix}-${word}-${index}`}
-        aria-label={word}
-        data-demo-output-word
-        data-demo-performance-word
-        data-demo-sweep-word={effect.sweep ? 'true' : undefined}
-        data-demo-flip-word={effect.flip ? 'true' : undefined}
-        data-demo-spin-word={effect.spin ? 'true' : undefined}
-        data-demo-frame-word={effect.frame ? 'true' : undefined}
-        data-demo-flip-direction={effect.direction}
-      >
-        {effect.sweep || effect.spin
-          ? Array.from(word).map((letter, letterIndex) => (
-              <span
-                key={`${keyPrefix}-${word}-${index}-${letterIndex}`}
-                aria-hidden="true"
-                data-demo-sweep-letter={effect.sweep ? 'true' : undefined}
-                data-demo-spin-letter={
-                  effect.spin &&
-                  (letterIndex === 0 ||
-                    letterIndex === Math.max(0, Math.floor(word.length / 2)))
-                    ? 'true'
-                    : undefined
-                }
-              >
-                {letter}
-              </span>
-            ))
-          : word}
-      </span>
-    );
-  });
+      ))}
+    </>
+  );
 }
 
 export function Demos() {
-  const [active, setActive] = useState<DemoId>(DEMO_TABS[0].id);
   const sectionRef = useRef<HTMLElement>(null);
-  const current = DEMO_TABS.find((tab) => tab.id === active)!;
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+  useGSAP(
+    () => {
+      const root = sectionRef.current;
+      if (!root) return;
 
-    const ctx = gsap.context(() => {
-      const prefersReducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
+      const track = root.querySelector<HTMLElement>('[data-demo-track]');
+      const progress = root.querySelector<HTMLElement>('[data-demo-progress]');
+      const progressText = root.querySelector<HTMLElement>(
+        '[data-demo-progress-text]'
+      );
+      const panels = gsap.utils.toArray<HTMLElement>('[data-demo-panel]', root);
 
-      const stage = section.querySelector<HTMLElement>('[data-demo-stage]');
-      const words = gsap.utils.toArray<HTMLElement>('[data-demo-word]', section);
-      const output = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-output-line]',
-        section
-      );
-      const outputWords = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-output-word]',
-        section
-      );
-      const performanceWords = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-performance-word]',
-        section
-      );
-      const flipWords = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-flip-word]',
-        section
-      );
-      const frameWords = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-frame-word]',
-        section
-      );
-      const sweepLetters = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-sweep-letter]',
-        section
-      );
-      const spinLetters = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-spin-letter]',
-        section
-      );
-      const context = gsap.utils.toArray<HTMLElement>(
-        '[data-demo-context]',
-        section
-      );
+      if (!track || panels.length === 0) return;
 
-      if (prefersReducedMotion) {
-        gsap.set(
-          [
-            ...words,
-            ...output,
-            ...outputWords,
-            ...performanceWords,
-            ...flipWords,
-            ...frameWords,
-            ...sweepLetters,
-            ...spinLetters,
-            ...context,
-            stage
-          ],
-          {
-            clearProps: 'all'
+      const mm = gsap.matchMedia();
+
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        gsap.set(track, { clearProps: 'all' });
+        gsap.set(panels, { autoAlpha: 1, clearProps: 'all' });
+        if (progress) gsap.set(progress, { scaleX: 1 });
+        if (progressText) progressText.textContent = `${panels.length}/${panels.length}`;
+      });
+
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.set(track, { x: 0 });
+        gsap.set(panels, {
+          autoAlpha: 0.4,
+          scale: 0.92,
+          filter: 'blur(5px)'
+        });
+        gsap.set(panels[0]!, {
+          autoAlpha: 1,
+          scale: 1,
+          filter: 'blur(0px)'
+        });
+        if (progress) gsap.set(progress, { scaleX: 0, transformOrigin: '0% 50%' });
+
+        const getDistance = () =>
+          Math.max(0, track.scrollWidth - window.innerWidth);
+
+        const horizontal = gsap.to(track, {
+          x: () => -getDistance(),
+          ease: 'none',
+          scrollTrigger: {
+            id: 'demos-horizontal-gallery',
+            trigger: root,
+            start: 'top top',
+            end: () => `+=${getDistance() + window.innerHeight * 0.82}`,
+            pin: true,
+            scrub: 0.85,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              const activeIndex = Math.min(
+                panels.length - 1,
+                Math.max(0, Math.round(self.progress * (panels.length - 1)))
+              );
+
+              panels.forEach((panel, index) => {
+                panel.toggleAttribute('data-active', index === activeIndex);
+              });
+
+              if (progress) {
+                gsap.set(progress, { scaleX: self.progress });
+              }
+              if (progressText) {
+                progressText.textContent = `${activeIndex + 1}/${panels.length}`;
+              }
+            }
           }
-        );
-        return;
-      }
+        });
 
-      gsap.set(stage, { autoAlpha: 1 });
-      gsap.set(words, {
-        autoAlpha: 0,
-        y: 20,
-        rotateX: -62,
-        filter: 'blur(8px)',
-        transformOrigin: '50% 100%'
-      });
-      gsap.set(output, {
-        autoAlpha: 0,
-        y: 18,
-        clipPath: 'inset(0 100% 0 0)',
-        filter: 'blur(7px)'
-      });
-      gsap.set(outputWords, {
-        autoAlpha: 0,
-        yPercent: 62,
-        rotateX: -74,
-        filter: 'blur(8px)',
-        transformOrigin: '50% 100%'
-      });
-      gsap.set(performanceWords, {
-        transformOrigin: '50% 58%',
-        transformStyle: 'preserve-3d'
-      });
-      gsap.set(sweepLetters, {
-        color: 'inherit',
-        textShadow: 'none',
-        transformOrigin: '50% 60%'
-      });
-      gsap.set(spinLetters, {
-        color: 'inherit',
-        textShadow: 'none',
-        transformOrigin: '50% 58%',
-        transformStyle: 'preserve-3d'
-      });
-      gsap.set(frameWords, {
-        '--demo-frame-scale': 0,
-        '--demo-frame-opacity': 0
-      });
-      gsap.set(context, {
-        autoAlpha: 0,
-        y: 14,
-        filter: 'blur(6px)'
-      });
+        panels.forEach((panel) => {
+          const chrome = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-chrome]',
+            panel
+          );
+          const ghostWords = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-ghost-word]',
+            panel
+          );
+          const proofCards = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-proof]',
+            panel
+          );
+          const energyPath = panel.querySelector<HTMLElement>(
+            '[data-demo-energy]'
+          );
+          const roughWords = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-rough-word]',
+            panel
+          );
+          const polishedLines = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-polished-line]',
+            panel
+          );
+          const polishedWords = gsap.utils.toArray<HTMLElement>(
+            '[data-demo-polished-word]',
+            panel
+          );
 
-      const tl = gsap.timeline({
-        paused: true,
-        defaults: { ease: 'power3.out' }
-      });
-
-      tl.to(context, {
-        autoAlpha: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.55,
-        stagger: 0.12
-      })
-        .to(
-          words,
-          {
+          gsap.to(panel, {
             autoAlpha: 1,
-            y: 0,
-            rotateX: 0,
-            filter: 'blur(0px)',
-            duration: 0.8,
-            stagger: { each: 0.024, from: 'start' }
-          },
-          '-=0.08'
-        )
-        .to(
-          output,
-          {
-            autoAlpha: 1,
-            y: 0,
-            clipPath: 'inset(0 0% 0 0)',
-            filter: 'blur(0px)',
-            duration: 0.75,
-            stagger: 0.18
-          },
-          '-=0.02'
-        )
-        .to(
-          outputWords,
-          {
-            autoAlpha: 1,
-            yPercent: 0,
-            rotateX: 0,
-            filter: 'blur(0px)',
-            duration: 0.9,
-            stagger: { each: 0.018, from: 'start' }
-          },
-          '-=0.6'
-        )
-        .addLabel('afterPerformance', '+=0.38')
-        .to(
-          flipWords,
-          {
-            yPercent: -8,
-            rotationX: (index) => (index % 2 === 0 ? 360 : -360),
-            rotationY: (index, target) =>
-              Number(target.dataset.demoFlipDirection || 0) === 1 ? -18 : 16,
-            rotationZ: (index) => (index % 2 === 0 ? -1.4 : 1.1),
-            scale: 1.025,
-            filter: 'drop-shadow(0 0 20px rgba(232, 194, 106, 0.24))',
-            duration: 1.05,
-            ease: 'power2.inOut',
-            stagger: { each: 0.22, from: 'start' }
-          },
-          'afterPerformance+=0.18'
-        )
-        .to(
-          frameWords,
-          {
-            '--demo-frame-scale': 1,
-            '--demo-frame-opacity': 1,
-            color: '#fff3c7',
-            duration: 0.62,
-            ease: 'power3.out',
-            stagger: { each: 0.24, from: 'start' }
-          },
-          'afterPerformance+=0.32'
-        )
-        .to(
-          sweepLetters,
-          {
-            color: '#f3cf79',
-            yPercent: (index) => (index % 2 === 0 ? -7 : -3),
-            rotationX: (index) => (index % 2 === 0 ? -16 : 12),
-            textShadow: '0 0 20px rgba(232, 194, 106, 0.58)',
-            duration: 0.24,
-            repeat: 1,
-            yoyo: true,
-            ease: 'sine.inOut',
-            stagger: { each: 0.045, from: 'start' }
-          },
-          'afterPerformance+=0.5'
-        )
-        .to(
-          spinLetters,
-          {
-            color: '#fff3c7',
-            yPercent: 0,
-            rotationY: (index) => (index % 2 === 0 ? 360 : -360),
-            rotationX: (index) => (index % 2 === 0 ? 0 : 360),
-            scale: 1.08,
-            textShadow: '0 0 20px rgba(255, 244, 211, 0.46)',
-            duration: 0.95,
-            ease: 'power2.inOut',
-            stagger: { each: 0.14, from: 'center' }
-          },
-          'afterPerformance+=1.08'
-        )
-        .to(
-          frameWords,
-          {
-            '--demo-frame-scale': 0,
-            '--demo-frame-opacity': 0,
-            color: 'inherit',
-            duration: 0.62,
-            ease: 'power3.inOut',
-            stagger: { each: 0.1, from: 'end' }
-          },
-          'afterPerformance+=2.35'
-        )
-        .to(
-          flipWords,
-          {
-            yPercent: 0,
             scale: 1,
-            filter: 'drop-shadow(0 0 0 rgba(0, 0, 0, 0))',
-            duration: 0.82,
-            ease: 'power3.out',
-            stagger: { each: 0.06, from: 'end' }
-          },
-          'afterPerformance+=2.1'
-        )
-        .to(
-          spinLetters,
-          {
-            color: 'inherit',
-            scale: 1,
-            textShadow: '0 0 0 rgba(0, 0, 0, 0)',
-            duration: 0.46,
-            ease: 'power3.out',
-            stagger: { each: 0.06, from: 'end' }
-          },
-          'afterPerformance+=2.18'
-        )
-        .set(
-          [...flipWords, ...frameWords, ...sweepLetters, ...spinLetters],
-          {
-            clearProps:
-              'color,textShadow,transform,filter,--demo-frame-scale,--demo-frame-opacity'
-          },
-          '+=0.05'
-        );
+            filter: 'blur(0px)',
+            ease: 'none',
+            scrollTrigger: {
+              containerAnimation: horizontal,
+              trigger: panel,
+              start: 'left 80%',
+              end: 'center center',
+              scrub: 0.6
+            }
+          });
 
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry?.isIntersecting) {
-            tl.restart();
+          gsap.to(panel, {
+            autoAlpha: 0.42,
+            scale: 0.94,
+            filter: 'blur(4px)',
+            ease: 'none',
+            scrollTrigger: {
+              containerAnimation: horizontal,
+              trigger: panel,
+              start: 'center center',
+              end: 'right 18%',
+              scrub: 0.6
+            }
+          });
+
+          gsap.fromTo(
+            ghostWords,
+            { autoAlpha: 0.035, y: 34, filter: 'blur(14px)' },
+            {
+              autoAlpha: 0.42,
+              y: 0,
+              filter: 'blur(0px)',
+              ease: 'none',
+              stagger: 0.007,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 82%',
+                end: 'left 38%',
+                scrub: 0.65
+              }
+            }
+          );
+
+          gsap.to(ghostWords, {
+            autoAlpha: 0.13,
+            y: -18,
+            filter: 'blur(5px)',
+            ease: 'none',
+            stagger: 0.003,
+            scrollTrigger: {
+              containerAnimation: horizontal,
+              trigger: panel,
+              start: 'left 36%',
+              end: 'right 16%',
+              scrub: 0.7
+            }
+          });
+
+          gsap.fromTo(
+            proofCards,
+            { y: 36, rotateX: -8, autoAlpha: 0, filter: 'blur(10px)' },
+            {
+              y: 0,
+              rotateX: 0,
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              ease: 'none',
+              stagger: 0.08,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 70%',
+                end: 'left 30%',
+                scrub: 0.55
+              }
+            }
+          );
+
+          if (energyPath) {
+            gsap.fromTo(
+              energyPath,
+              { scaleX: 0, autoAlpha: 0.18 },
+              {
+                scaleX: 1,
+                autoAlpha: 1,
+                ease: 'none',
+                scrollTrigger: {
+                  containerAnimation: horizontal,
+                  trigger: panel,
+                  start: 'left 56%',
+                  end: 'left 16%',
+                  scrub: 0.7
+                }
+              }
+            );
           }
-        },
-        { threshold: 0.42 }
-      );
 
-      if (stage) {
-        observer.observe(stage);
-      } else {
-        tl.restart();
-      }
+          gsap.fromTo(
+            chrome,
+            { autoAlpha: 0, y: 16, filter: 'blur(8px)' },
+            {
+              autoAlpha: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              ease: 'none',
+              stagger: 0.04,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 72%',
+                end: 'left 42%',
+                scrub: 0.55
+              }
+            }
+          );
 
-      return () => {
-        observer.disconnect();
-        tl.kill();
-      };
-    }, section);
+          gsap.fromTo(
+            roughWords,
+            { autoAlpha: 0.18, y: 18, rotateX: -38, filter: 'blur(8px)' },
+            {
+              autoAlpha: 1,
+              y: 0,
+              rotateX: 0,
+              filter: 'blur(0px)',
+              ease: 'none',
+              stagger: 0.012,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 68%',
+                end: 'left 32%',
+                scrub: 0.5
+              }
+            }
+          );
 
-    return () => ctx.revert();
-  }, [active, current.id]);
+          gsap.fromTo(
+            polishedLines,
+            { autoAlpha: 0, x: 34, filter: 'blur(10px)' },
+            {
+              autoAlpha: 1,
+              x: 0,
+              filter: 'blur(0px)',
+              ease: 'none',
+              stagger: 0.08,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 42%',
+                end: 'left 8%',
+                scrub: 0.55
+              }
+            }
+          );
+
+          gsap.fromTo(
+            polishedWords,
+            { autoAlpha: 0.2, yPercent: 48 },
+            {
+              autoAlpha: 1,
+              yPercent: 0,
+              ease: 'none',
+              stagger: 0.009,
+              scrollTrigger: {
+                containerAnimation: horizontal,
+                trigger: panel,
+                start: 'left 34%',
+                end: 'left 0%',
+                scrub: 0.55
+              }
+            }
+          );
+        });
+
+        return () => {
+          horizontal.kill();
+        };
+      });
+
+      return () => mm.revert();
+    },
+    { scope: sectionRef }
+  );
 
   return (
     <section
       ref={sectionRef}
       id="demos"
       data-section-fx
-      className="real-demos-section relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center overflow-hidden py-24 md:scroll-mt-32 md:py-32 lg:py-36"
+      data-section-fx-pinned
+      className="demo-scroll-section relative isolate min-h-[100svh] scroll-mt-28 overflow-hidden md:scroll-mt-32"
     >
-      <div aria-hidden="true" className="real-demos-ambient" />
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
-        <SectionHeading
-          className="demo-section-heading"
-          title="Say it your way."
-          accent="Send it polished."
-          subtitle="Pick an app and see the same thought become clear writing without changing what you meant."
-        />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-32 bg-gradient-to-b from-ink-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-32 bg-gradient-to-t from-ink-950 to-transparent" />
 
-        <Reveal delay={0.1}>
-          <div className="mt-14 flex justify-center md:mt-16 lg:mt-18">
-            <div
-              role="tablist"
-              aria-label="Choose a writing app demo"
-              className="demo-app-tabs flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full p-1.5"
-            >
-              {DEMO_TABS.map((tab) => {
-                const Icon = TAB_ICONS[tab.id];
-                const selected = active === tab.id;
-
-                return (
-                  <button
-                    key={tab.id}
-                    role="tab"
-                    type="button"
-                    aria-selected={selected}
-                    onClick={() => setActive(tab.id)}
-                    className={cn(
-                      'group relative flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition duration-300',
-                      selected
-                        ? 'text-ink-950 shadow-[0_0_28px_rgba(232,194,106,0.26)]'
-                        : 'text-silver-300 hover:text-silver-100'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'absolute inset-0 rounded-full transition duration-300',
-                        selected
-                          ? 'bg-gold-sheen'
-                          : 'bg-white/[0.03] opacity-0 group-hover:opacity-100'
-                      )}
-                    />
-                    <Icon className="relative z-10 h-4 w-4" />
-                    <span className="relative z-10">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </Reveal>
-
-        <div
-          key={current.id}
-          data-demo-stage
-          className="demo-kinetic-stage mt-10 md:mt-12"
-        >
-          <div className="demo-kinetic-grid">
-            <article className="demo-kinetic-before">
-              <div data-demo-context className="demo-kinetic-label">
-                Before
-              </div>
-              <p className="demo-word-field">
-                {splitWords(current.beforeText).map((word, index) => (
-                  <span key={`${word}-${index}`} data-demo-word>
-                    {word}
-                  </span>
-                ))}
-              </p>
-            </article>
-
-            <article className="demo-kinetic-after">
-              <div data-demo-context className="demo-kinetic-label">
-                After
-              </div>
-              <div className="demo-output-text">
-                <h4 data-demo-output-line>
-                  {renderOutputWords(current.afterTitle, 'title', current.id)}
-                </h4>
-                {current.afterBlocks.map((block, blockIndex) => (
-                  <p key={block} data-demo-output-line>
-                    {renderOutputWords(
-                      block,
-                      `block-${blockIndex}`,
-                      current.id
-                    )}
-                  </p>
-                ))}
-              </div>
-            </article>
+      <div className="demo-scroll-kicker pointer-events-none absolute left-6 right-6 top-24 z-30 mx-auto flex max-w-7xl items-center justify-between gap-4 lg:left-10 lg:right-10">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-gold-200/75">
+            Story proof
+          </p>
+          <h2 className="mt-2 max-w-3xl text-balance text-3xl font-semibold leading-[1.02] tracking-[0] text-silver-100 md:text-5xl lg:text-6xl">
+            Raw thought crosses the cursor.{' '}
+            <span className="script-accent gold-text">Finished writing lands.</span>
+          </h2>
+        </div>
+        <div className="hidden min-w-28 text-right font-mono text-xs text-silver-300 md:block">
+          <span data-demo-progress-text>1/{DEMO_TABS.length}</span>
+          <div className="mt-3 h-px w-full overflow-hidden bg-white/12">
+            <span
+              data-demo-progress
+              className="block h-full w-full origin-left scale-x-0 bg-gold-300"
+            />
           </div>
         </div>
       </div>
+
+      <div
+        data-demo-track
+        className="demo-scroll-track flex min-h-[100svh] w-max will-change-transform motion-reduce:w-full motion-reduce:flex-col motion-reduce:gap-8 motion-reduce:py-36"
+      >
+        {DEMO_TABS.map((demo) => (
+          <DemoPanel key={demo.id} demo={demo} />
+        ))}
+      </div>
     </section>
+  );
+}
+
+function DemoPanel({ demo }: { demo: DemoItem }) {
+  const Icon = TAB_ICONS[demo.id];
+  const meta = DEMO_META[demo.id];
+  const style = { '--demo-accent': meta.accent } as CSSProperties;
+
+  return (
+    <article
+      data-demo-panel
+      className="demo-scroll-panel flex min-h-[100svh] w-screen shrink-0 items-center px-6 pb-16 pt-56 motion-reduce:min-h-0 motion-reduce:w-full md:px-10 md:pb-20 md:pt-52"
+      style={style}
+    >
+      <div className="demo-story-watermark" aria-hidden="true">
+        <span className="demo-story-number">{meta.number}</span>
+        <p className="demo-story-ghost">
+          <DemoWords
+            text={demo.beforeText}
+            kind="ghost"
+            prefix={`${demo.id}-ghost`}
+          />
+        </p>
+      </div>
+
+      <div className="demo-scroll-panel-inner mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[0.52fr_1.48fr] lg:gap-12">
+        <div className="demo-scroll-narrative flex flex-col justify-between gap-8">
+          <div data-demo-chrome>
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-silver-200">
+              <Icon className="h-4 w-4" />
+              {demo.label}
+            </div>
+            <p className="mt-6 font-mono text-xs uppercase tracking-[0.22em] text-gold-200/70">
+              {meta.number} / {meta.mode}
+            </p>
+            <h3 className="mt-4 max-w-xl text-balance text-4xl font-semibold leading-[0.96] tracking-[0] text-silver-100 md:text-5xl">
+              {demo.title}
+            </h3>
+            <p className="mt-5 max-w-md text-pretty text-base leading-8 text-silver-300">
+              {demo.caption}
+            </p>
+          </div>
+        </div>
+
+        <div className="demo-scroll-comparison demo-proof-stage min-w-0">
+          <div data-demo-energy className="demo-voice-energy" aria-hidden="true" />
+          <section data-demo-proof className="demo-scroll-card demo-scroll-card-rough">
+            <div data-demo-chrome className="demo-scroll-card-label">
+              <span>Before</span>
+              <span>spoken thought</span>
+            </div>
+            <p className="demo-scroll-rough-text">
+              <DemoWords
+                text={demo.beforeText}
+                kind="rough"
+                prefix={`${demo.id}-rough`}
+              />
+            </p>
+          </section>
+
+          <section data-demo-proof className="demo-scroll-card demo-scroll-card-polished">
+            <div data-demo-chrome className="demo-scroll-card-label">
+              <span>After</span>
+              <span>{demo.resultLabel}</span>
+            </div>
+            <div className="demo-scroll-output">
+              <h4 data-demo-polished-line>
+                <DemoWords
+                  text={demo.afterTitle}
+                  kind="polished"
+                  prefix={`${demo.id}-title`}
+                />
+              </h4>
+              {demo.afterBlocks.map((block, index) => (
+                <p key={block} data-demo-polished-line>
+                  <DemoWords
+                    text={block}
+                    kind="polished"
+                    prefix={`${demo.id}-block-${index}`}
+                  />
+                </p>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </article>
   );
 }

@@ -58,7 +58,7 @@ export function FinalCta() {
       </div>
 
         {/* ===== TEXT BLOCK UNDER the moving object ===== */}
-      <div className="relative z-10 -mt-20 flex w-full items-start justify-center px-6 pb-24 md:-mt-28 md:pb-32">
+      <div data-section-fx-inner className="relative z-10 -mt-20 flex w-full items-start justify-center px-6 pb-24 md:-mt-28 md:pb-32">
         <div className="w-full max-w-3xl text-center">
           <Reveal>
             <h2 className="mx-auto max-w-3xl text-balance text-5xl font-medium leading-[0.98] tracking-tight text-white md:text-6xl lg:text-7xl">

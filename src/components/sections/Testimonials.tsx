@@ -48,7 +48,7 @@ export function Testimonials() {
       data-section-fx
       className="relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center py-28 md:scroll-mt-32 md:py-36"
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <div data-section-fx-inner className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionHeading
           eyebrow="What people are saying"
           title="Real feedback,"

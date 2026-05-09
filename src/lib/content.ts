@@ -6,9 +6,9 @@
 export const BRAND = {
   name: 'SpeakToText',
   tagline: 'Stop typing. Start speaking.',
-  heroHeadline: 'Stop wasting time typing.',
+  heroHeadline: 'Speak once. Get the right output everywhere.',
   heroSubcopy:
-    'SpeakToText turns your voice into clean text in any app. Hold a key, say what you want, then let go. Your words appear where your cursor is.',
+    'SpeakToText turns voice into polished writing, prompts, replies, summaries, and business-ready drafts across your daily apps.',
   subTagline:
     'Turn your voice into polished text anywhere you write.',
   platform: 'Windows'

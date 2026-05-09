@@ -26,9 +26,10 @@ import { Rig } from './anywhere-3d/Rig';
 import { BrandGrid } from './anywhere-3d/BrandGrid';
 import { BRAND_WALL } from './anywhere-3d/brandsData';
 import { useBrandTextures } from './anywhere-3d/useBrandTexture';
+import { TopographyBackground } from './anywhere-3d/TopographyBackground';
 
-export function AnywhereCanvas() {
-  const [dpr, setDpr] = useState<[number, number]>([1, 2]);
+export function AnywhereCanvas({ active = true }: { active?: boolean }) {
+  const [dpr, setDpr] = useState<[number, number]>([1, 1.5]);
   const [wallProfile, setWallProfile] = useState<WallProfile>('desktop');
   const [, forceRender] = useState(0);
 
@@ -62,6 +63,7 @@ export function AnywhereCanvas() {
     <Canvas
       camera={{ position: [0, 0, CONFIG.zoomOut], fov: 45 }}
       dpr={dpr}
+      frameloop={active ? 'always' : 'demand'}
       gl={{
         antialias: true,
         alpha: true,
@@ -71,14 +73,21 @@ export function AnywhereCanvas() {
       style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
     >
       <PerformanceMonitor
-        onDecline={() => setDpr([1, 1.5])}
-        onIncline={() => setDpr([1, 2])}
+        onDecline={() => setDpr([1, 1.2])}
+        onIncline={() => setDpr([1, 1.5])}
       />
 
       <Rig key={`rig-${wallProfile}`} gridW={dims.width} gridH={dims.height} />
 
       {/* Deep-ink fog so tiles far from center fade out naturally */}
       <fog attach="fog" args={[CONFIG.sceneBg, CONFIG.fogNear, CONFIG.fogFar]} />
+      <TopographyBackground
+        color={CONFIG.bgColor}
+        opacity={CONFIG.bgOpacity}
+        speed={CONFIG.bgSpeed}
+        scale={CONFIG.bgScale}
+        lineThickness={CONFIG.bgLineThickness}
+      />
 
       {textures.length === BRAND_WALL.length && (
         <Suspense fallback={null}>

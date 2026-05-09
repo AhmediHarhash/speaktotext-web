@@ -6,7 +6,6 @@ import { Hero } from '@/components/sections/Hero';
 import { Demos } from '@/components/sections/Demos';
 import { Anywhere } from '@/components/sections/Anywhere';
 import { FeatureStory } from '@/components/sections/FeatureStory';
-import { Testimonials } from '@/components/sections/Testimonials';
 import { Pricing } from '@/components/sections/Pricing';
 import { Faq } from '@/components/sections/Faq';
 import { FinalCta } from '@/components/sections/FinalCta';
@@ -26,7 +25,6 @@ export default function Page() {
       <Demos />
       <HowItWorksLazy />
       <FeatureStory />
-      <Testimonials />
       <Pricing />
       <Faq />
       <FinalCta />

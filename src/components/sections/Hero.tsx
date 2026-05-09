@@ -5,8 +5,10 @@ import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
 import { ArrowUpRight, Play, Check } from 'lucide-react';
 import { BRAND, TRUST_POINTS } from '@/lib/content';
+import { cn } from '@/lib/cn';
 import { ButtonLink } from '../ui/Button';
 import { HeroDemoPanel } from '../HeroDemoPanel';
+import { CinematicHero, hasCinematicHeroAsset } from './CinematicHero';
 
 type HeadlineWord = {
   readonly text: string;
@@ -14,12 +16,19 @@ type HeadlineWord = {
 };
 
 const HEADLINE_LINES: readonly (readonly HeadlineWord[])[] = [
-  [{ text: 'Stop' }],
   [
-    { text: 'wasting' },
-    { text: 'time' }
+    { text: 'Speak' },
+    { text: 'once.' }
   ],
-  [{ text: 'typing.', accent: true }]
+  [
+    { text: 'Get' },
+    { text: 'the' },
+    { text: 'right' }
+  ],
+  [
+    { text: 'output' },
+    { text: 'everywhere.', accent: true }
+  ]
 ] as const;
 
 const DESKTOP_CHAR_OFFSETS = [
@@ -40,6 +49,10 @@ const MOBILE_CHAR_OFFSETS = [
 
 const useIsoLayoutEffect =
   typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+const HERO_VIDEO_URL = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim() ?? '';
+const HERO_VIDEO_POSTER =
+  process.env.NEXT_PUBLIC_HERO_VIDEO_POSTER_URL?.trim() ?? '';
 
 function HeroHeadline() {
   return (
@@ -84,6 +97,10 @@ function HeroHeadline() {
 }
 
 export function Hero() {
+  return hasCinematicHeroAsset ? <CinematicHero /> : <ClassicHero />;
+}
+
+function ClassicHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subcopyRef = useRef<HTMLParagraphElement>(null);
@@ -91,6 +108,7 @@ export function Hero() {
   const noteRef = useRef<HTMLParagraphElement>(null);
   const trustRef = useRef<HTMLUListElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const hasHeroVideo = HERO_VIDEO_URL.length > 0;
 
   useIsoLayoutEffect(() => {
     if (!sectionRef.current || !headlineRef.current || !subcopyRef.current) {
@@ -384,7 +402,19 @@ export function Hero() {
       data-section-fx
       className="hero-shell relative flex min-h-[100svh] flex-col justify-center overflow-hidden bg-ink-950 pt-32 md:pt-40"
     >
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 overflow-visible px-6 pb-24 md:pb-32 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10 lg:px-10">
+      {hasHeroVideo ? (
+        <HeroVideoBackdrop src={HERO_VIDEO_URL} poster={HERO_VIDEO_POSTER} />
+      ) : null}
+
+      <div
+        data-section-fx-inner
+        className={cn(
+          'relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 overflow-visible px-6 pb-24 md:pb-32 lg:gap-10 lg:px-10',
+          hasHeroVideo
+            ? 'lg:grid-cols-[minmax(0,0.82fr)_minmax(0,0.18fr)]'
+            : 'lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]'
+        )}
+      >
         {/* LEFT: copy */}
         <div className="hero-mobile-bound flex min-w-0 flex-col justify-center">
           <h1
@@ -462,11 +492,40 @@ export function Hero() {
         {/* RIGHT: product demo panel */}
         <div
           ref={panelRef}
-          className="hero-mobile-bound hero-panel-stage relative min-w-0 overflow-visible"
+          className={cn(
+            'hero-mobile-bound hero-panel-stage relative min-w-0 overflow-visible',
+            hasHeroVideo && 'hidden lg:block'
+          )}
         >
-          <HeroDemoPanel />
+          {hasHeroVideo ? null : <HeroDemoPanel />}
         </div>
       </div>
     </section>
+  );
+}
+
+function HeroVideoBackdrop({
+  src,
+  poster
+}: {
+  src: string;
+  poster?: string;
+}) {
+  return (
+    <div aria-hidden className="hero-video-backdrop pointer-events-none absolute inset-0 z-0">
+      <video
+        className="h-full w-full object-cover"
+        src={src}
+        poster={poster || undefined}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_72%_58%_at_70%_40%,rgba(232,194,106,0.1),transparent_58%),linear-gradient(90deg,rgba(5,7,13,0.96)_0%,rgba(5,7,13,0.76)_38%,rgba(5,7,13,0.28)_70%,rgba(5,7,13,0.84)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-ink-950 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-ink-950/95 to-transparent" />
+    </div>
   );
 }
