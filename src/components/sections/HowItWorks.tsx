@@ -9,6 +9,7 @@ import { trackEvent } from '@/lib/analytics';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const FRONT_POSTER = '/how-it-works/zoom/how-works-front-source.png';
+const MOBILE_FRONT_POSTER = '/how-it-works/zoom/how-works-front-mobile.jpg';
 const VIDEO_PLATE = '/how-it-works/zoom/mountain-video-plate.png';
 const YOUTUBE_VIDEO = process.env.NEXT_PUBLIC_HOW_IT_WORKS_YOUTUBE_URL ?? '';
 const OWNED_VIDEO = process.env.NEXT_PUBLIC_HOW_IT_WORKS_VIDEO_URL ?? '';
@@ -20,6 +21,13 @@ const FRONT_IMAGE = {
   portalX: 817,
   portalY: 464,
   portalRadius: 76
+};
+const MOBILE_FRONT_IMAGE = {
+  width: 1536,
+  height: 2752,
+  portalX: 768,
+  portalY: 1370,
+  portalRadius: 170
 };
 
 function getYouTubeEmbedUrl(input: string) {
@@ -75,14 +83,15 @@ export function HowItWorks() {
       const getPortalMetrics = () => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const scale = Math.max(viewportWidth / FRONT_IMAGE.width, viewportHeight / FRONT_IMAGE.height);
-        const renderedWidth = FRONT_IMAGE.width * scale;
-        const renderedHeight = FRONT_IMAGE.height * scale;
+        const frontImage = viewportWidth < 768 ? MOBILE_FRONT_IMAGE : FRONT_IMAGE;
+        const scale = Math.max(viewportWidth / frontImage.width, viewportHeight / frontImage.height);
+        const renderedWidth = frontImage.width * scale;
+        const renderedHeight = frontImage.height * scale;
         const offsetX = (viewportWidth - renderedWidth) / 2;
         const offsetY = (viewportHeight - renderedHeight) / 2;
-        const x = offsetX + FRONT_IMAGE.portalX * scale;
-        const y = offsetY + FRONT_IMAGE.portalY * scale;
-        const baseRadius = FRONT_IMAGE.portalRadius * scale;
+        const x = offsetX + frontImage.portalX * scale;
+        const y = offsetY + frontImage.portalY * scale;
+        const baseRadius = frontImage.portalRadius * scale;
         const radius =
           viewportWidth < 768 ? Math.max(34, Math.min(baseRadius * 0.46, viewportWidth * 0.12)) : baseRadius;
         const fullRadius =
@@ -254,15 +263,18 @@ export function HowItWorks() {
               </div>
             ) : null}
 
-            <img
-              src={FRONT_POSTER}
-              alt=""
-              data-how-front
-              className="how-portal-front absolute inset-0 h-full w-full object-cover"
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-            />
+            <picture>
+              <source media="(max-width: 767px)" srcSet={MOBILE_FRONT_POSTER} />
+              <img
+                src={FRONT_POSTER}
+                alt=""
+                data-how-front
+                className="how-portal-front absolute inset-0 h-full w-full object-cover"
+                draggable={false}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
 
           <div data-how-exit className="pointer-events-none absolute inset-0 z-[6] bg-[#02040a]" />
