@@ -6,16 +6,17 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Play } from 'lucide-react';
 import { BRAND } from '@/lib/content';
+import { MEDIA_BASE_URL } from '@/lib/site';
 import { ButtonLink } from '../ui/Button';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const DESKTOP_VIDEO =
   process.env.NEXT_PUBLIC_HERO_CINEMATIC_VIDEO_URL?.trim() ??
-  '/hero-cinematic/hero-master-desktop.mp4';
+  `${MEDIA_BASE_URL}/hero-cinematic/v1/hero-master-desktop.mp4`;
 const DESKTOP_POSTER =
   process.env.NEXT_PUBLIC_HERO_CINEMATIC_POSTER_URL?.trim() ??
-  '/hero-cinematic/hero-master-poster.jpg';
+  `${MEDIA_BASE_URL}/hero-cinematic/v1/hero-master-poster.jpg`;
 const MOBILE_VIDEO =
   process.env.NEXT_PUBLIC_HERO_CINEMATIC_MOBILE_VIDEO_URL?.trim() ?? '';
 const MOBILE_POSTER =
