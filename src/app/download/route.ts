@@ -5,7 +5,10 @@ export const dynamic = 'force-dynamic';
 
 type GitHubReleaseAsset = {
   name?: string;
+  url?: string;
   browser_download_url?: string;
+  content_type?: string;
+  size?: number;
   state?: string;
 };
 
@@ -23,6 +26,17 @@ type LatestDownload = {
   releasedAt?: string;
 };
 
+type ResolvedDownload =
+  | {
+      type: 'redirect';
+      url: string;
+    }
+  | {
+      type: 'github-asset';
+      asset: GitHubReleaseAsset;
+      token: string;
+    };
+
 const DEFAULT_ASSET_PATTERN =
   /\.(exe|msi|msix|msixbundle|appinstaller|zip)$/i;
 
@@ -37,7 +51,7 @@ const WINDOWS_SETUP_PRIORITY = [
   /\.zip$/i
 ] as const;
 
-function isSafeDownloadUrl(value: string | undefined) {
+function isSafeDownloadUrl(value: string | undefined): value is string {
   if (!value) return false;
 
   try {
@@ -114,10 +128,10 @@ function chooseReleaseAsset(assets: GitHubReleaseAsset[] | undefined) {
     );
   });
 
-  return sortedCandidates[0]?.browser_download_url ?? null;
+  return sortedCandidates[0] ?? null;
 }
 
-async function resolveGitHubLatestReleaseUrl() {
+async function resolveGitHubLatestRelease() {
   const repo = getGitHubRepo();
 
   if (!repo) {
@@ -149,19 +163,32 @@ async function resolveGitHubLatestReleaseUrl() {
   }
 
   const release = (await response.json()) as GitHubRelease;
-  const assetUrl = chooseReleaseAsset(release.assets);
+  const asset = chooseReleaseAsset(release.assets);
 
-  if (assetUrl) {
-    return assetUrl;
+  if (asset?.url && token) {
+    return {
+      type: 'github-asset',
+      asset,
+      token
+    } satisfies ResolvedDownload;
   }
 
-  return isSafeDownloadUrl(release.html_url) ? release.html_url : null;
+  if (asset?.browser_download_url) {
+    return {
+      type: 'redirect',
+      url: asset.browser_download_url
+    } satisfies ResolvedDownload;
+  }
+
+  return isSafeDownloadUrl(release.html_url)
+    ? ({ type: 'redirect', url: release.html_url } satisfies ResolvedDownload)
+    : null;
 }
 
 async function resolveLatestDownloadUrl() {
   const directUrl = process.env.DOWNLOAD_DIRECT_URL;
   if (isSafeDownloadUrl(directUrl)) {
-    return directUrl;
+    return { type: 'redirect', url: directUrl } satisfies ResolvedDownload;
   }
 
   const latestJsonUrl = process.env.DOWNLOAD_LATEST_JSON_URL;
@@ -175,33 +202,64 @@ async function resolveLatestDownloadUrl() {
       const payload = (await response.json()) as LatestDownload;
       const candidate = payload.downloadUrl ?? payload.url;
       if (isSafeDownloadUrl(candidate)) {
-        return candidate;
+        return { type: 'redirect', url: candidate } satisfies ResolvedDownload;
       }
     }
   }
 
-  const githubLatestUrl = await resolveGitHubLatestReleaseUrl();
-  if (githubLatestUrl) {
-    return githubLatestUrl;
+  const githubLatest = await resolveGitHubLatestRelease();
+  if (githubLatest) {
+    return githubLatest;
   }
 
   if (isSafeDownloadUrl(GITHUB_RELEASES_URL)) {
-    return GITHUB_RELEASES_URL;
+    return {
+      type: 'redirect',
+      url: GITHUB_RELEASES_URL
+    } satisfies ResolvedDownload;
   }
 
   return null;
 }
 
 export async function GET(request: Request) {
-  const url = await resolveLatestDownloadUrl();
+  const download = await resolveLatestDownloadUrl();
 
-  if (url) {
-    return NextResponse.redirect(url, {
+  if (download?.type === 'redirect') {
+    return NextResponse.redirect(download.url, {
       status: 302,
       headers: {
         'Cache-Control': 'no-store'
       }
     });
+  }
+
+  if (download?.type === 'github-asset') {
+    const assetResponse = await fetch(download.asset.url!, {
+      headers: {
+        Accept: 'application/octet-stream',
+        Authorization: `Bearer ${download.token}`,
+        'User-Agent': 'speaktotext-download-route',
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      cache: 'no-store'
+    });
+
+    if (assetResponse.ok && assetResponse.body) {
+      const filename = download.asset.name ?? 'SpeakToText-setup.exe';
+
+      return new Response(assetResponse.body, {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Type':
+            download.asset.content_type ??
+            assetResponse.headers.get('Content-Type') ??
+            'application/octet-stream'
+        }
+      });
+    }
   }
 
   return NextResponse.redirect(new URL('/#pricing', request.url), {
