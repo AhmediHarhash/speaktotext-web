@@ -16,7 +16,7 @@ export const MEDIA_BASE_URL =
 
 export const GITHUB_RELEASES_URL =
   process.env.NEXT_PUBLIC_GITHUB_RELEASES_URL ??
-  'https://github.com/hekax/speaktotext/releases/latest';
+  'https://github.com/AhmediHarhash/speaktotext/releases/latest';
 
 export const DEFAULT_META_TITLE =
   'SpeakToText | Stop wasting time typing.';
